@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String?
+  lastName  String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @db.Timestamp(0)
+  role      Role     @default(USER)
+  photos    Photo[]
+  cart      Cart?
+  orders    Order[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Photo {
+  id            Int            @id @default(autoincrement())
+  title         String
+  image_url     String
+  price         Float
+  sold          Int            @default(0)
+  createdAt     DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime       @updatedAt @db.Timestamp(0)
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    Int            @map("category_id")
+  cart          Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId        Int            @map("cart_id")
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int            @map("user_id")
+  photoKeywords PhotoKeyword[]
+  photoOrders   PhotoOrder[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String
+  Photos Photo[]
+}
+
+model Keyword {
+  id            Int            @id @default(autoincrement())
+  name          String
+  photoKeywords PhotoKeyword[]
+}
+
+model PhotoKeyword {
+  photoId   Int
+  keywordId Int
+
+  photo   Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@id([photoId, keywordId])
+  @@map("photo_keyword")
+}
+
+model Cart {
+  id     Int     @id @default(autoincrement())
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int     @unique @map("user_id")
+  Photo  Photo[]
+}
+
+model Order {
+  id            Int          @id @default(autoincrement())
+  paymentStatus Boolean      @default(false) @map("payment_status")
+  paymentDate   DateTime     @updatedAt @db.Timestamp(0)
+  total         Float
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int          @map("user_id")
+  photoOrders   PhotoOrder[]
+}
+
+model PhotoOrder {
+  photoId Int
+  orderId Int
+
+  photo   Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@id([photoId, orderId])
+  @@map("photo_order")
+}
