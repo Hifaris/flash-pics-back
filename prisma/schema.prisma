@@ -35,7 +35,10 @@ enum Role {
 model Photo {
   id            Int            @id @default(autoincrement())
   title         String
-  image_url     String
+  url           String
+  asset_id      String?
+  public_id     String?
+  secure_url    String?
   price         Float
   sold          Int            @default(0)
   createdAt     DateTime       @default(now()) @db.Timestamp(0)
@@ -51,14 +54,18 @@ model Photo {
 }
 
 model Category {
-  id     Int     @id @default(autoincrement())
-  name   String
-  Photos Photo[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @db.Timestamp(0)
+  Photos    Photo[]
 }
 
 model Keyword {
   id            Int            @id @default(autoincrement())
   name          String
+  createdAt     DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime       @updatedAt @db.Timestamp(0)
   photoKeywords PhotoKeyword[]
 }
 
@@ -74,10 +81,11 @@ model PhotoKeyword {
 }
 
 model Cart {
-  id     Int     @id @default(autoincrement())
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int     @unique @map("user_id")
-  Photo  Photo[]
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartTotal Float
+  userId    Int     @unique @map("user_id")
+  Photo     Photo[]
 }
 
 model Order {
@@ -94,8 +102,8 @@ model PhotoOrder {
   photoId Int
   orderId Int
 
-  photo   Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  photo Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@id([photoId, orderId])
   @@map("photo_order")

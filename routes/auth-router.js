@@ -6,6 +6,8 @@ const {registerValidator,loginValidator} = require("../middlewares/validator")
 
 router.post("/register",registerValidator,authController.register)
 router.post("/login",loginValidator,authController.login)
+router.post("/current-user",authen,authController.currentUser)
+router.post("/current-admin",authController.currentAdmin)
 router.get("/allUsers",authController.getUser)
 router.get("/me",authen,authController.getMe)
 

@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma")
+const createError = require("../utils/createError")
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken')
-const createError = require("../utils/createError")
 
 
 exports.register = async(req,res)=>{
@@ -118,4 +118,32 @@ exports.getMe = async(req,res,next) =>{
     } catch (err) {
         next(err)
     }
+}
+
+exports.currentUser = async(req,res,next)=>{
+    try {
+        
+        const email = req.user.user.email
+        const member = await prisma.user.findFirst({
+            where:{
+               email: email
+            },
+            select:{
+                id: true,
+                email: true,
+                role: true
+            }
+        })
+        console.log(member)
+        res.json({member})
+    } catch (err) {
+        next(err)
+    }
+}
+exports.currentAdmin = async(req,res,next)=>{
+   try {
+     res.json({message: "Current Admin"})
+   } catch (err) {
+    next(err)
+   }
 }

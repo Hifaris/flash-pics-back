@@ -14,6 +14,7 @@ app.use(cors())
 
 app.use("/auth",authRouter)
 app.use("/category",categoryRouter)
+app.use("/search",categoryRouter)
 
 app.use(errorHandler)
 app.use("*",notFoundHandler)
