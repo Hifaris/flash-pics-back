@@ -19,6 +19,7 @@ model User {
   lastName  String?
   email     String   @unique
   password  String
+  enable    Boolean  @default(true)
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @updatedAt @db.Timestamp(0)
   role      Role     @default(USER)
@@ -45,8 +46,7 @@ model Photo {
   updatedAt     DateTime       @updatedAt @db.Timestamp(0)
   category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId    Int            @map("category_id")
-  cart          Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId        Int            @map("cart_id")
+  PhotosCart    photoOnCart[]
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int            @map("user_id")
   photoKeywords PhotoKeyword[]
@@ -61,6 +61,14 @@ model Category {
   Photos    Photo[]
 }
 
+model photoOnCart {
+  id Int @id @default(autoincrement())
+  photos  Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  photoId Int
+  cart    Cart  @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId  Int
+}
+
 model Keyword {
   id            Int            @id @default(autoincrement())
   name          String
@@ -70,41 +78,48 @@ model Keyword {
 }
 
 model PhotoKeyword {
+  id        Int @id @default(autoincrement())
   photoId   Int
   keywordId Int
 
   photo   Photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)
   keyword Keyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
 
-  @@id([photoId, keywordId])
   @@map("photo_keyword")
 }
 
 model Cart {
-  id        Int     @id @default(autoincrement())
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cartTotal Float
-  userId    Int     @unique @map("user_id")
-  Photo     Photo[]
+  id         Int           @id @default(autoincrement())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartTotal  Decimal       @db.Decimal(7, 2)
+  userId     Int           @unique @map("user_id")
+  cartPhotos photoOnCart[]
 }
 
 model Order {
-  id            Int          @id @default(autoincrement())
-  paymentStatus Boolean      @default(false) @map("payment_status")
-  paymentDate   DateTime     @updatedAt @db.Timestamp(0)
-  total         Float
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int          @map("user_id")
+  id            Int           @id @default(autoincrement())
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  paymentDate   DateTime      @updatedAt @db.Timestamp(0)
+  total         Decimal       @db.Decimal(7, 2)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int           @map("user_id")
   photoOrders   PhotoOrder[]
 }
 
+enum PaymentStatus {
+  PENDING
+  CONFIRM
+  REJECT
+}
+
 model PhotoOrder {
+  id      Int     @id @default(autoincrement())
   photoId Int
   orderId Int
+  price   Decimal @db.Decimal(7, 2)
 
   photo Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  @@id([photoId, orderId])
   @@map("photo_order")
 }

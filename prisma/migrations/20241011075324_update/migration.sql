@@ -7,7 +7,7 @@ CREATE TABLE `User` (
     `password` VARCHAR(191) NOT NULL,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL,
-    `role` ENUM('USER', 'ROLE') NOT NULL DEFAULT 'USER',
+    `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `User_email_key`(`email`),
     PRIMARY KEY (`id`)
@@ -17,12 +17,16 @@ CREATE TABLE `User` (
 CREATE TABLE `Photo` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
-    `image_url` VARCHAR(191) NOT NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `asset_id` VARCHAR(191) NULL,
+    `public_id` VARCHAR(191) NULL,
+    `secure_url` VARCHAR(191) NULL,
     `price` DOUBLE NOT NULL,
     `sold` INTEGER NOT NULL DEFAULT 0,
     `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
     `updatedAt` TIMESTAMP(0) NOT NULL,
     `category_id` INTEGER NOT NULL,
+    `cart_id` INTEGER NOT NULL,
     `user_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -32,6 +36,8 @@ CREATE TABLE `Photo` (
 CREATE TABLE `Category` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
+    `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updatedAt` TIMESTAMP(0) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -40,21 +46,25 @@ CREATE TABLE `Category` (
 CREATE TABLE `Keyword` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
+    `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+    `updatedAt` TIMESTAMP(0) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `photo_keyword` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `photoId` INTEGER NOT NULL,
     `keywordId` INTEGER NOT NULL,
 
-    PRIMARY KEY (`photoId`, `keywordId`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Cart` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `cartTotal` DECIMAL(7, 2) NOT NULL,
     `user_id` INTEGER NOT NULL,
 
     UNIQUE INDEX `Cart_user_id_key`(`user_id`),
@@ -62,19 +72,11 @@ CREATE TABLE `Cart` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `cart_photo` (
-    `cartId` INTEGER NOT NULL,
-    `photoId` INTEGER NOT NULL,
-
-    PRIMARY KEY (`cartId`, `photoId`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `Order` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `payment_status` BOOLEAN NOT NULL DEFAULT false,
     `paymentDate` TIMESTAMP(0) NOT NULL,
-    `total` DOUBLE NOT NULL,
+    `total` DECIMAL(7, 2) NOT NULL,
     `user_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -82,14 +84,19 @@ CREATE TABLE `Order` (
 
 -- CreateTable
 CREATE TABLE `photo_order` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `photoId` INTEGER NOT NULL,
     `orderId` INTEGER NOT NULL,
+    `price` DECIMAL(7, 2) NOT NULL,
 
-    PRIMARY KEY (`photoId`, `orderId`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `Photo` ADD CONSTRAINT `Photo_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `Category`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Photo` ADD CONSTRAINT `Photo_cart_id_fkey` FOREIGN KEY (`cart_id`) REFERENCES `Cart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Photo` ADD CONSTRAINT `Photo_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -102,12 +109,6 @@ ALTER TABLE `photo_keyword` ADD CONSTRAINT `photo_keyword_keywordId_fkey` FOREIG
 
 -- AddForeignKey
 ALTER TABLE `Cart` ADD CONSTRAINT `Cart_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `cart_photo` ADD CONSTRAINT `cart_photo_cartId_fkey` FOREIGN KEY (`cartId`) REFERENCES `Cart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `cart_photo` ADD CONSTRAINT `cart_photo_photoId_fkey` FOREIGN KEY (`photoId`) REFERENCES `Photo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Order` ADD CONSTRAINT `Order_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

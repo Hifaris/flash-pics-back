@@ -20,6 +20,36 @@ const userData = [
 	},
 ]
 
+const categoryData = [
+	{
+		name: 'Animal'
+	},
+	{
+		name: 'Business'
+	},
+	{
+		name: 'Sea'
+	},
+	{
+		name: 'Ai/Tech'
+	},
+	{
+		name: 'Activity'
+	},
+	{
+		name: 'Mountain'
+	},
+	{
+		name: 'Holiday'
+	},
+	{
+		name: 'Agriculture'
+	},
+	{
+		name: 'Background'
+	},
+]
+
 console.log("DB seed....")
 
 async function run() {
@@ -28,4 +58,11 @@ async function run() {
     })
 }
 
+async function runCategory(){
+	await prisma.category.createMany({
+		data: categoryData
+	})
+}
+
 run()
+runCategory()
