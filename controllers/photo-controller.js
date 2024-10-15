@@ -1,17 +1,20 @@
 const { query } = require("express")
 const prisma = require("../config/prisma")
 const createError = require("../utils/createError")
+const cloudinary = require("../config/cloudinary")
+const fs = require("fs/promises")
 
 exports.createPhoto = async (req, res, next) => {
     try {
-        const { title, url, price, categoryId, userId } = req.body
+        const promisUrl = await cloudinary.uploader.upload(req.file.path)
+        const { title, price, categoryId, userId } = req.body
         const rs = await prisma.photo.create({
             data: {
                 title: title,
-                url: url,
-                // asset_id,   
-                // public_id,    
-                // secure_url,
+                url: promisUrl.url,
+                asset_id:promisUrl.asset_id,   
+                public_id:promisUrl.public_id,    
+                secure_url :promisUrl.secure_url,
                 price: Number(price),
                 categoryId: Number(categoryId),
                 userId: +userId
@@ -54,9 +57,10 @@ exports.listPhoto = async (req, res, next) => {
                 id: true,
                 title: true,
                 url: true,
+                price: true,
                 createdAt: true,
                 category: {
-                    select: { name: true }
+                    select: { name: true,id:true }
                 }
             },
 

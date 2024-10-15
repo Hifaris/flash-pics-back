@@ -2,8 +2,9 @@ const express = require("express")
 const router = express.Router()
 const {createPhoto,allPhotos,listPhoto,sortPhotos,updatePhoto,deletePhoto,searchPhotos} = require("../controllers/photo-controller")
 const { authCheck } = require("../middlewares/authen")
+const upload = require("../middlewares/upload")
 
-router.post("/",createPhoto)
+router.post("/",authCheck,upload.single("file"),createPhoto)
 router.get("/",allPhotos)
 
 router.get("/:count",authCheck,listPhoto)
