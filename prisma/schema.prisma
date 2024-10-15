@@ -62,11 +62,14 @@ model Category {
 }
 
 model photoOnCart {
-  id Int @id @default(autoincrement())
-  photos  Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
-  photoId Int
-  cart    Cart  @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  cartId  Int
+  id        Int      @id @default(autoincrement())
+  photos    Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  photoId   Int
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    Int
+  price     Float
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @db.Timestamp(0)
 }
 
 model Keyword {

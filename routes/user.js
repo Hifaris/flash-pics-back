@@ -1,18 +1,19 @@
 const express = require("express")
 const router = express.Router()
-const {listUsers} = require("../controllers/user-controller")
-const authenticate = require("../middlewares/authen")
+const {listUsers,changStatus,changRole,createUserCart,getUserCart,deleteUserCart,saveOrder,getOrder} = require("../controllers/user-controller")
+const {authCheck,adminCheck} = require("../middlewares/authen")
 
 
-router.get("/",authenticate,listUsers)
-router.post("/chang-status",)
-router.post("/chang-role",)
 
-router.post("/cart",)
-router.get("/cart",)
-router.delete("/cart",)
+router.get("/",authCheck,adminCheck,listUsers)
+router.post("/chang-status",authCheck,adminCheck,changStatus)
+router.post("/chang-role",authCheck,adminCheck,changRole)
 
-router.post("/order",)
-router.get("/order",)
+router.post("/cart",authCheck,createUserCart)
+router.get("/cart",authCheck,getUserCart)
+router.delete("/cart",authCheck,deleteUserCart)
+
+router.post("/order",authCheck,saveOrder)
+router.get("/order",authCheck,getOrder)
 
 module.exports = router

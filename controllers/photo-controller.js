@@ -14,7 +14,7 @@ exports.createPhoto = async (req, res, next) => {
                 // secure_url,
                 price: Number(price),
                 categoryId: Number(categoryId),
-                userId: userId
+                userId: +userId
             }
         })
         res.json({ result: rs })
@@ -61,7 +61,7 @@ exports.listPhoto = async (req, res, next) => {
             },
 
         })
-        res.json(photos)
+        res.json({photos})
     } catch (err) {
         next(err)
     }
@@ -188,7 +188,7 @@ exports.searchPhotos = async (req, res, next) => {
 
         if (query) {
             console.log("filter query",query)
-            await handleQuery(req,res,next,query)
+            await handleQuery(req,res,query)
         }
         if (category) {
             console.log("search by category",category)

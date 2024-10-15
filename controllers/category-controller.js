@@ -1,6 +1,22 @@
 const prisma = require("../config/prisma")
 const createError = require("../utils/createError")
 
+
+exports.userGetCategory = async(req,res,next)=>{
+    try {
+        const allCategory = await prisma.category.findMany({
+            select:{
+                id: true,
+                name: true,
+                createdAt: true
+            }
+        })
+
+        res.json({allCategory})
+    } catch (err) {
+        next(err)
+    }
+}
 exports.getCategory = async(req,res,next)=>{
     try {
         const allCategory = await prisma.category.findMany({
@@ -11,7 +27,7 @@ exports.getCategory = async(req,res,next)=>{
             }
         })
 
-        res.json({result: allCategory})
+        res.json({allCategory})
     } catch (err) {
         next(err)
     }

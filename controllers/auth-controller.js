@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken')
 
 
-exports.register = async(req,res)=>{
+exports.register = async(req,res,next)=>{
     try {
         const {email,password,confirmPassword} = req.input
 
@@ -142,7 +142,19 @@ exports.currentUser = async(req,res,next)=>{
 }
 exports.currentAdmin = async(req,res,next)=>{
    try {
-     res.json({message: "Current Admin"})
+    const email = req.user.user.email
+    const admin = await prisma.user.findFirst({
+        where:{
+           email: email
+        },
+        select:{
+            id: true,
+            email: true,
+            role: true
+        }
+    })
+    console.log(admin)
+    res.json({admin})
    } catch (err) {
     next(err)
    }

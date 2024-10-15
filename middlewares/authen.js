@@ -2,7 +2,7 @@
 const prisma = require("../config/prisma")
 const jwt = require("jsonwebtoken")
 const createError = require("../utils/createError")
-module.exports = async (req,res,next) => {
+exports.authCheck = async (req,res,next) => {
   try {
   
     const authHeader = req.headers.authorization
@@ -31,11 +31,29 @@ module.exports = async (req,res,next) => {
     if(!user.enable){
       return createError(400,"user invalid")
     }
-    console.log(user)
+    // console.log(user)
 
 
     next()
 } catch (err) {
     next(err)
 }
+}
+
+exports.adminCheck = async(req,res,next)=>{
+
+  try {
+    const {email} = req.user.user
+    console.log(email)
+    const adminUser = await prisma.user.findFirst({
+      where:{email:email}
+    })
+    if(!adminUser || adminUser.role !== "ADMIN"){
+      return createError(403, "This account can not access")
+    }
+    console.log("adminnnn",adminUser.role)
+    next()
+  } catch (err) {
+    next(err)
+  }
 }

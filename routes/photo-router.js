@@ -1,11 +1,12 @@
 const express = require("express")
 const router = express.Router()
 const {createPhoto,allPhotos,listPhoto,sortPhotos,updatePhoto,deletePhoto,searchPhotos} = require("../controllers/photo-controller")
+const { authCheck } = require("../middlewares/authen")
 
 router.post("/",createPhoto)
 router.get("/",allPhotos)
 
-router.get("/:count",listPhoto)
+router.get("/:count",authCheck,listPhoto)
 
 router.post("/photoBy",sortPhotos)
 // sort product such as newest
