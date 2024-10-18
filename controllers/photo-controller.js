@@ -1,4 +1,4 @@
-const { query } = require("express")
+const { query, text } = require("express")
 const prisma = require("../config/prisma")
 const createError = require("../utils/createError")
 const cloudinary = require("../config/cloudinary")
@@ -7,20 +7,25 @@ const fs = require("fs/promises")
 exports.createPhoto = async (req, res, next) => {
     try {
         const promisUrl = await cloudinary.uploader.upload(req.file.path)
-        const { title, price, categoryId, userId } = req.body
+        const { title, type,price, categoryId, userId } = req.body
         const rs = await prisma.photo.create({
             data: {
                 title: title,
+                type: type,
                 url: promisUrl.url,
-                asset_id:promisUrl.asset_id,   
-                public_id:promisUrl.public_id,    
-                secure_url :promisUrl.secure_url,
+                asset_id: promisUrl.asset_id,
+                public_id: promisUrl.public_id,
+                secure_url: promisUrl.secure_url,
                 price: Number(price),
                 categoryId: Number(categoryId),
                 userId: +userId
             }
         })
+        fs.unlink(req.file.path)
+        console.log(req.body)
+        console.log("fileeeee", req.file)
         res.json({ result: rs })
+        // res.send("Hello")
     } catch (err) {
         next(err)
     }
@@ -39,11 +44,12 @@ exports.allPhotos = async (req, res, next) => {
                 }
             }
         })
-        res.json({ allPhotos })
+        res.json(allPhotos )
     } catch (err) {
         next(err)
     }
 }
+
 
 
 exports.listPhoto = async (req, res, next) => {
@@ -57,15 +63,53 @@ exports.listPhoto = async (req, res, next) => {
                 id: true,
                 title: true,
                 url: true,
+                public_id: true,
                 price: true,
                 createdAt: true,
                 category: {
-                    select: { name: true,id:true }
+                    select: { name: true, id: true }
                 }
             },
 
         })
-        res.json({photos})
+        res.json({ photos })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.readPhoto = async (req, res, next) => {
+    try {
+
+        const { id } = req.params
+        const photo = await prisma.photo.findFirst({
+          
+            where:{
+             id: +id
+            },
+            include:{
+                category: true
+            }
+            
+
+        })
+        res.json({ photo})
+    } catch (err) {
+        next(err)
+    }
+}
+exports.read = async (req, res, next) => {
+    try {
+        // code
+        const { id } = req.params
+        const photo = await prisma.photo.findFirst({
+            where: {
+                id: Number(id)
+            },
+            include: {
+                category: true,
+            }
+        })
+        res.json({ photo })
     } catch (err) {
         next(err)
     }
@@ -89,16 +133,19 @@ exports.sortPhotos = async (req, res, next) => {
 exports.updatePhoto = async (req, res, next) => {
     try {
         const { id } = req.params
-        const { title } = req.body
+        const { title, price, categoryId, userId } = req.body
         const photo = await prisma.photo.update({
             where: {
                 id: +id
             },
             data: {
-                title: title
+                title: title,
+                price: Number(price),
+                categoryId: Number(categoryId),
+                userId: +userId
             }
         })
-        res.json('Update photo')
+        res.json({ msg: 'Update successful' })
     } catch (err) {
         next(err)
     }
@@ -107,18 +154,36 @@ exports.deletePhoto = async (req, res, next) => {
     try {
 
         const { id } = req.params
-        const photo = await prisma.photo.delete({
+
+        const photo = await prisma.photo.findFirst({
+            where: { id: +id },
+
+        })
+
+        if (!photo) {
+            return createError(400, "Photo not found")
+        }
+
+        const deleteImage = new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(photo.public_id, (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            });
+          });
+
+          await deleteImage
+        await prisma.photo.delete({
             where: {
                 id: +id
             }
         })
-        res.json('Delete photo')
+        res.json({ msg: "delete successful" })
     } catch (err) {
         next(err)
     }
 }
 
-const handleQuery = async (req, res, next, query) => {
+const handleQuery = async (req, res, query) => {
     try {
         const products = await prisma.photo.findMany({
             where: {
@@ -126,9 +191,9 @@ const handleQuery = async (req, res, next, query) => {
                     contains: query,
                 }
             },
-            include:{
-                category:{
-                    select:{
+            include: {
+                category: {
+                    select: {
                         id: true,
                         name: true
                     }
@@ -141,23 +206,23 @@ const handleQuery = async (req, res, next, query) => {
     }
 }
 
-const handleCategory = async (req,res,category)=>{
+const handleCategory = async (req, res, category) => {
     try {
         const products = await prisma.photo.findMany({
-            where:{
+            where: {
                 categoryId: {
-                    in: category.map((id)=> Number(id))
+                    in: category.map((id) => Number(id))
                 }
             },
-            include:{
-                category:{
-                    select:{
+            include: {
+                category: {
+                    select: {
                         id: true,
                         name: true
                     }
                 }
             }
-           
+
         })
         res.json(products)
     } catch (err) {
@@ -165,22 +230,22 @@ const handleCategory = async (req,res,category)=>{
     }
 }
 
-const handlePrice = async(req,res,price)=>{
+const handlePrice = async (req, res, price) => {
     try {
         const products = await prisma.photo.findMany({
-            where:{
-                price:{
+            where: {
+                price: {
                     gte: price[0],
                     lte: price[1]
                 }
             },
-            include:{
-                category:{
-                    select: {id:true,name: true}
+            include: {
+                category: {
+                    select: { id: true, name: true }
                 }
             }
         })
-        res.json({products})
+        res.json( products )
     } catch (err) {
         console.log(err)
     }
@@ -189,20 +254,21 @@ exports.searchPhotos = async (req, res, next) => {
     try {
 
         const { query, category, price } = req.body
+        console.log(req.body)
 
         if (query) {
-            console.log("filter query",query)
-            await handleQuery(req,res,query)
+            console.log("filter query", query)
+            await handleQuery(req, res, query)
         }
         if (category) {
-            console.log("search by category",category)
-            await handleCategory(req,res,category)
+            console.log("search by category", category)
+            await handleCategory(req, res, category)
         }
         if (price) {
-            console.log("search by price",price)
-            await handlePrice(req,res,price)
+            console.log("search by price", price)
+            await handlePrice(req, res, price)
         }
-        
+
 
         // res.json('search')
     } catch (err) {

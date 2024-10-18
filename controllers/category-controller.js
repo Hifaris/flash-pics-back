@@ -1,15 +1,20 @@
 const prisma = require("../config/prisma")
 const createError = require("../utils/createError")
+const cloudinary = require("../config/cloudinary")
 
 
 exports.userGetCategory = async(req,res,next)=>{
     try {
         const allCategory = await prisma.category.findMany({
-            select:{
-                id: true,
-                name: true,
-                createdAt: true
+
+            include:{
+              Photos:true
             }
+            // select:{
+            //     id: true,
+            //     name: true,
+            //     createdAt: true
+            // }
         })
 
         res.json({allCategory})
@@ -45,11 +50,17 @@ exports.getOneCategory = async(req,res,next)=>{
                 select:{
                     id: true,
                     title: true,
-                    url: true
+                    url: true,
+                    // category
+
                 }
                }
             }
         })
+        console.log(oneCategory)
+        // const photo = await prisma.photo.findFirst({
+        //     where: 
+        // })
 
         res.json({result: oneCategory})
     } catch (err) {
@@ -60,10 +71,13 @@ exports.createCategory = async(req,res,next)=>{
     try {
 
         const {name} = req.body
-
+        console.log("file",req.file)
+        const upload = await cloudinary.uploader.upload(req.file.path)
+        const photo = upload.url
         const crateCategory = await prisma.category.findFirst({
             where:{
                 name:name
+               
             }
         })
         if(crateCategory) {
@@ -71,7 +85,8 @@ exports.createCategory = async(req,res,next)=>{
         }
         const category = await prisma.category.create({
             data:{
-                name:name
+                name:name,
+                url: photo
             }
         })
         res.json({msg: "Create successfully"})

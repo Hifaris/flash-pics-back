@@ -131,6 +131,10 @@ exports.currentUser = async(req,res,next)=>{
             select:{
                 id: true,
                 email: true,
+                firstName: true,
+                lastName: true,
+                updatedAt: true,
+                password: true,
                 role: true
             }
         })
