@@ -84,6 +84,31 @@ exports.login = async(req,res,next)=>{
     }
 }
 
+exports.updateUser = async(req,res,next)=>{
+    try {
+        const {email,password,firstName,lastName} = req.body
+
+        //1 Validate req.body****joi
+        
+        //2 check in db email already exist
+        const hashPassword = await bcrypt.hash(password,10)
+        const updateUser = await prisma.user.update({
+            where:{
+                id: req.user.user.id
+            }, data:{
+                firstName,
+                lastName,
+                email,
+                password:hashPassword,
+            }
+        })
+    
+        
+        res.json({msg: "Update successfully"})
+    } catch (err) {
+         next(err)
+    }
+}
 exports.getUser = async(req,res,next) =>{
     try {
           const rs = await prisma.user.findMany({

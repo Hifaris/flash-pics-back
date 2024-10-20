@@ -6,6 +6,7 @@ const categoryRouter = require("./routes/category-router")
 const productRouter = require("./routes/photo-router")
 const adminRouter = require("./routes/admin")
 const userRouter = require("./routes/user")
+const paymentRouter = require("./routes/payment")
 const notFoundHandler = require("./middlewares/not-found")
 const errorHandler = require("./middlewares/error")
 const morgan = require("morgan")
@@ -13,13 +14,18 @@ const cors = require("cors")
 
 app.use(express.json())
 app.use(morgan('dev'))
-app.use(cors())
+app.use(cors({
+    origin:'http://localhost:5173',
+    method:['GET','POST','PATCH','PUT','DELETE'],
+    credentials:true,
+}))
 
 app.use("/auth",authRouter)
 app.use("/category",categoryRouter)
 app.use("/photo",productRouter)
 app.use("/user",userRouter)
 app.use("/admin",adminRouter)
+app.use("/payment",paymentRouter)
 
 app.use(errorHandler)
 app.use("*",notFoundHandler)

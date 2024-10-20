@@ -28,10 +28,10 @@ exports.authCheck = async (req,res,next) => {
       }
     })
 
-    if(!user.enable){
-      return createError(400,"user invalid")
-    }
-    // console.log(user)
+    // if(!user.enable){
+    //   return createError(400,"user invalid")
+    // }
+    console.log(user)
 
 
     next()
