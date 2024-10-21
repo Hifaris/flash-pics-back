@@ -204,24 +204,56 @@ exports.getUserCart = async (req, res, next) => {
 }
 exports.deleteUserCart = async (req, res, next) => {
     try {
-
+        
+        const {id} = req.params
+        console.log(id)
         const cart = await prisma.cart.findFirst({
-            where: { userId: req.user.user.id }
+            where: { userId: req.user.user.id },
+            include:{
+                cartPhotos: true
+            }
+
         })
+
+
 
         if (!cart) {
             return createError(400, "No cart exist")
         }
-
+        console.log(cart.id,id)
         await prisma.photoOnCart.deleteMany({
             where: {
-                cartId: cart.id
+                cartId: cart.id,
+                photoId: +id
             }
         })
 
-        const result = await prisma.cart.deleteMany({
-            where: { userId: req.user.user.id }
+        const userCart = await prisma.cart.findFirst({
+            where: { userId: req.user.user.id },
+            include:{
+                cartPhotos: true
+            }
+
         })
+        let cartTotal =  userCart.cartPhotos.reduce((acc, prv) => {
+            console.log(prv)
+            // acc + prv.price 
+            return acc + prv.price * 1
+        },0)
+
+        await prisma.cart.update({
+            where:{id: cart.id},
+            data:{cartTotal:cartTotal}
+        })
+
+       
+        console.log("cartttt",cartTotal)
+
+
+
+        // const result = await prisma.cart.delete({
+        //     where: { userId: req.user.user.id }
+        // })
         res.json({ message: "remove success" })
     } catch (err) {
         next(err)
@@ -327,7 +359,7 @@ exports.deleteUserCart = async (req, res, next) => {
 
 exports.saveOrder = async (req, res, next) => {
     try {
-        // Find the user's cart
+        // Find user cart
         const userCart = await prisma.cart.findFirst({
             where: {
                 userId: req.user.user.id
@@ -342,7 +374,7 @@ exports.saveOrder = async (req, res, next) => {
             return res.status(400).json({ error: "Cart is empty" });
         }
 
-        // Create a new order with the cart photos
+        // create a new order with the cart photos
         const order = await prisma.order.create({
             data: {
                 photoOrders: {
@@ -356,7 +388,7 @@ exports.saveOrder = async (req, res, next) => {
             }
         });
 
-        // Optional: If the order status is confirmed, update the sold count
+        // If the order status is confirmed, update the sold count
         if (order.paymentStatus === "CONFIRM") {
             await Promise.all(
                 userCart.cartPhotos.map((el) =>
@@ -370,7 +402,7 @@ exports.saveOrder = async (req, res, next) => {
             );
         }
 
-        // Delete the user's cart and associated cartPhotos
+        // Delete the user cart and 
         await prisma.photoOnCart.deleteMany({
             where: { cartId: userCart.id }
         });
@@ -379,7 +411,7 @@ exports.saveOrder = async (req, res, next) => {
             where: { userId: req.user.user.id }
         });
 
-        // Return the newly created order
+        
         res.json({ order });
 
     } catch (err) {

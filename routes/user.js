@@ -11,7 +11,7 @@ router.post("/chang-role",authCheck,adminCheck,changRole)
 
 router.post("/cart",authCheck,createUserCart)
 router.get("/cart",authCheck,getUserCart)
-router.delete("/cart",authCheck,deleteUserCart)
+router.delete("/cart/:id",authCheck,deleteUserCart)
 
 router.post("/order",authCheck,saveOrder)
 router.get("/order",authCheck,getOrder)

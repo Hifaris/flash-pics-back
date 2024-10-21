@@ -88,9 +88,6 @@ exports.updateUser = async(req,res,next)=>{
     try {
         const {email,password,firstName,lastName} = req.body
 
-        //1 Validate req.body****joi
-        
-        //2 check in db email already exist
         const hashPassword = await bcrypt.hash(password,10)
         const updateUser = await prisma.user.update({
             where:{
