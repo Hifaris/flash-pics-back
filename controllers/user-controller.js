@@ -1,6 +1,7 @@
 const { date } = require("joi")
 const prisma = require("../config/prisma")
 const createError = require("../utils/createError")
+const nodemailer = require("nodemailer")
 
 exports.listUsers = async (req, res, next) => {
     try {
@@ -474,19 +475,85 @@ exports.getOneOrder = async (req, res, next) => {
     }
 };
 
-exports.changPaymentStatus = async(req,res,next)=>{
-   try {
-    const order = await prisma.order.update({
-        where: {
-            id: +req.params.id
+exports.changPaymentStatus = async (req, res, next) => {
+    try {
+       
+        const order = await prisma.order.update({
+            where: {
+                id: +req.params.id,
+            },
+            data: {
+                paymentStatus: "CONFIRM",
+            },
+            include: {
+                photoOrders: {
+                    include: {
+                        photo: true, 
+                    }
+                },
+                user: true,
+            },
+        });
 
-        },
-        data: {
-            paymentStatus: "CONFIRM" 
+       
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
         }
-    })
-    res.json({msg: "Payment successfully"})
-   } catch (error) {
-    next(error)
-   }
-}
+
+        if (order.paymentStatus === "CONFIRM") {
+            await Promise.all(
+                order.photoOrders.map((el) =>
+                    prisma.photo.update({
+                        where: { id: el.photoId },
+                        data: {
+                            sold: { increment: 1 },
+                        },
+                    })
+                )
+            );
+        }
+
+      
+        let photoHtml = `<p>Here are your photos:</p>`;
+        order.photoOrders.forEach(el => {
+            const photoUrl = el.photo.url; 
+            photoHtml += `<div><p>${el.photo.title}</p><img src="${photoUrl}" alt="Photo" style="max-width: 100%; height: auto;" /></div>`;
+        });
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'nattapongbe@gmail.com', 
+                pass: 'brud lcds wqcb gmri',   
+            },
+        });
+
+     
+        const mailOptions = {
+            from: 'nattapongbe@gmail.com', 
+            to: order.user.email,         
+            subject: 'Order Payment Confirmation',
+            html: `
+                <p>Dear ${order.user.email},</p>
+                <p>Your payment has been confirmed for Order #${order.id}.</p>
+                ${photoHtml}
+                <p>Thank you for your purchase!</p>
+                <p>Flash Pics Admin</p>
+            `,
+        };
+
+      
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({ msg: 'Failed to send confirmation email.' });
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.json({ msg: 'Payment successfully confirmed and email sent.' });
+            }
+        });
+    } catch (error) {
+        console.error('Error in changPaymentStatus:', error);
+        next(error);
+    }
+};
