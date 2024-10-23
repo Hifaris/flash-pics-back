@@ -31,7 +31,7 @@ exports.register = async(req,res,next)=>{
                 password:hashPassword,
             }
         })
-        console.log(newUser)
+        // console.log(newUser)
         res.json(`Register successfully ${newUser.email}`)
     } catch (err) {
          next(err)
@@ -123,7 +123,7 @@ exports.getUser = async(req,res,next) =>{
 exports.getMe = async(req,res,next) =>{
     try {
        
-        console.log(req.user)
+        // console.log(req.user)
         const email= req.user.user.email
         const userDetail = await prisma.user.findFirst({
             where:{
@@ -160,7 +160,7 @@ exports.currentUser = async(req,res,next)=>{
                 role: true
             }
         })
-        console.log(member)
+        // console.log(member)
         res.json({member})
     } catch (err) {
         next(err)

@@ -22,8 +22,8 @@ exports.createPhoto = async (req, res, next) => {
             }
         })
         fs.unlink(req.file.path)
-        console.log(req.body)
-        console.log("fileeeee", req.file)
+        // console.log(req.body)
+        // console.log("fileeeee", req.file)
         res.json({ result: rs })
         // res.send("Hello")
     } catch (err) {

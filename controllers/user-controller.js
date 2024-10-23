@@ -89,81 +89,15 @@ exports.createUserCart = async (req, res, next) => {
             },
 
         })
-        console.log(products)
-        console.log(newCart)
+        // console.log(products)
+        // console.log(newCart)
         res.json("user cart")
     } catch (err) {
         next(err)
     }
 }
 
-// exports.createUserCart = async (req, res, next) => {
-//     try {
-//         const { cart } = req.body;
-//         // Check if the cart exists and is not empty
-//         if (!cart || cart.length === 0) {
-//             return res.status(400).json({ error: "Cart is empty" });
-//         }
 
-//         // Find user
-//         const user = await prisma.user.findFirst({
-//             where: { id: req.user.user.id }
-//         });
-
-//         if (!user) {
-//             return res.status(404).json({ error: "User not found" });
-//         }
-
-//         // Delete old cart items
-//         await prisma.photoOnCart.deleteMany({
-//             where: {
-//                 cart: {
-//                     userId: user.id
-//                 }
-//             }
-//         });
-
-//         // Delete old cart
-//         await prisma.cart.deleteMany({
-//             where: { userId: user.id }
-//         });
-
-//         // Prepare valid products by filtering out any invalid items
-//         let products = cart
-//             .filter(item => item.id && item.price) // Filter out undefined values
-//             .map(item => ({
-//                 photoId: item.id,
-//                 price: item.price
-//             }));
-
-//         // Check if there are valid products left after filtering
-//         if (products.length === 0) {
-//             return res.status(400).json({ error: "No valid products in the cart" });
-//         }
-
-//         // Calculate cartTotal
-//         let cartTotal = products.reduce((acc, product) => acc + product.price, 0);
-
-//         // Create new cart
-//         const newCart = await prisma.cart.create({
-//             data: {
-//                 cartPhotos: {
-//                     create: products
-//                 },
-//                 cartTotal: cartTotal,
-//                 userId: user.id
-//             }
-//         });
-
-//         console.log(products);
-//         console.log(newCart);
-
-//         // Respond with success
-//         res.json("User cart created successfully");
-//     } catch (err) {
-//         next(err); // Pass the error to error handling middleware
-//     }
-// };
 
 exports.getUserCart = async (req, res, next) => {
     try {
@@ -221,7 +155,7 @@ exports.deleteUserCart = async (req, res, next) => {
         if (!cart) {
             return createError(400, "No cart exist")
         }
-        console.log(cart.id,id)
+        // console.log(cart.id,id)
         await prisma.photoOnCart.deleteMany({
             where: {
                 cartId: cart.id,
@@ -260,103 +194,7 @@ exports.deleteUserCart = async (req, res, next) => {
         next(err)
     }
 }
-// exports.deleteUserCart = async (req, res, next) => {
-//     try {
-//         const { photoId } = req.params;  // Extract photoId from the URL parameters
 
-//         const cart = await prisma.cart.findFirst({
-//             where: { userId: req.user.user.id }
-//         });
-
-//         if (!cart) {
-//             return createError(400, "No cart exists");
-//         }
-
-//         // Delete the specific photo from the cart by photoId
-//         const deleteResult = await prisma.photoOnCart.deleteMany({
-//             where: {
-//                 cartId: cart.id,
-//                 photoId: parseInt(photoId)  // Ensure it's parsed as an integer
-//             }
-//         });
-// const result = await prisma.cart.deleteMany({
-//     where: { userId: req.user.user.id }
-// })
-
-//         if (deleteResult.count === 0) {
-//             return createError(404, "Photo not found in the cart");
-//         }
-
-//         res.json({ message: "Photo removed from cart successfully" });
-//     } catch (err) {
-//         next(err);
-//     }
-// };
-// exports.saveOrder = async (req, res, next) => {
-//     try {
-
-//         const userCart = await prisma.cart.findFirst({
-//             where: {
-//                 userId: req.user.user.id
-//             }, include: {
-//                 cartPhotos: true
-
-//             }
-//         })
-//         console.log("usercattttt", userCart)
-
-//         if (!userCart || userCart.cartPhotos.length === 0) {
-//             return createError(400, "Cart is empty")
-//         }
-
-//         //create new order
-//         const order = await prisma.order.create({
-//             data: {
-//                 photoOrders: {
-//                     create: userCart.cartPhotos.map((el) => ({
-//                         photoId: el.photoId,
-//                         price: el.price,
-//                     }))
-//                 },
-//                 userId: req.user.user.id,
-//                 total: userCart.cartTotal
-
-//             }
-//         })
-
-
-//         // update photo in the cart
-//         const update = userCart.cartPhotos.map((el) => ({
-//             where: { id: el.photoId },
-//             data: {
-//                 sold: { increment: +1 }
-//             }
-//         }))
-
-
-
-//         // console.log("order1111",typeof(order.paymentStatus))
-
-//         // check payment status
-//         if (order.paymentStatus === "CONFIRM") {
-
-//             await Promise.all(
-//                 update.map((el) => prisma.photo.update(el))
-//             )
-//         }
-
-
-//         await prisma.cart.deleteMany({
-//             where: { userId: req.user.user.id }
-//         })
-
-
-//         // console.log(userCart)
-//         res.json({ order })
-//     } catch (err) {
-//         next(err)
-//     }
-// }
 
 exports.saveOrder = async (req, res, next) => {
     try {
@@ -541,7 +379,7 @@ exports.changPaymentStatus = async (req, res, next) => {
                 <p>Flash Pics Admin</p>
             `,
         };
-
+        // console.log(mailOptions)
       
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
