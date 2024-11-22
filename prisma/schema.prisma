@@ -26,6 +26,8 @@ model User {
   photos    Photo[]
   cart      Cart?
   orders    Order[]
+
+  @@map("user")
 }
 
 enum Role {
@@ -52,6 +54,8 @@ model Photo {
   userId        Int            @map("user_id")
   photoKeywords PhotoKeyword[]
   photoOrders   PhotoOrder[]
+
+  @@map("photo")
 }
 
 model Category {
@@ -61,6 +65,8 @@ model Category {
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @updatedAt @db.Timestamp(0)
   Photos    Photo[]
+
+  @@map("category")
 }
 
 model photoOnCart {
@@ -72,6 +78,8 @@ model photoOnCart {
   price     Float
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @updatedAt @db.Timestamp(0)
+
+  @@map("photooncart")
 }
 
 model Keyword {
@@ -80,6 +88,8 @@ model Keyword {
   createdAt     DateTime       @default(now()) @db.Timestamp(0)
   updatedAt     DateTime       @updatedAt @db.Timestamp(0)
   photoKeywords PhotoKeyword[]
+
+  @@map("keyword")
 }
 
 model PhotoKeyword {
@@ -99,6 +109,8 @@ model Cart {
   cartTotal  Decimal       @db.Decimal(7, 2)
   userId     Int           @unique @map("user_id")
   cartPhotos photoOnCart[]
+
+  @@map("cart")
 }
 
 model Order {
@@ -109,6 +121,8 @@ model Order {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int           @map("user_id")
   photoOrders   PhotoOrder[]
+
+  @@map("order")
 }
 
 enum PaymentStatus {
