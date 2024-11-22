@@ -6,7 +6,10 @@ const fs = require("fs/promises")
 
 exports.createPhoto = async (req, res, next) => {
     try {
+
+        //receive req.file and upload to Cloudinary
         const promisUrl = await cloudinary.uploader.upload(req.file.path)
+        // req.file.path คือที่อยู่ของไฟล์ที่ถูกอัปโหลดในเซิร์ฟเวอร์
         const { title, type,price, categoryId, userId } = req.body
         const rs = await prisma.photo.create({
             data: {

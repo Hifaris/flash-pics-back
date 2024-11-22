@@ -44,7 +44,7 @@ exports.adminCheck = async(req,res,next)=>{
 
   try {
     const {email} = req.user.user
-    console.log(email)
+    // console.log(email)
     const adminUser = await prisma.user.findFirst({
       where:{email:email}
     })

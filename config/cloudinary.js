@@ -7,4 +7,6 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
+//cloudinary to store file on  cloud after uploading file will be  stored in Cloudinary and return URL of file to be stored in DB
+
 module.exports =cloudinary

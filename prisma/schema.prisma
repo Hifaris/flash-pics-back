@@ -34,8 +34,8 @@ enum Role {
 }
 
 model Photo {
-  id            Int           @id @default(autoincrement())
-  type          String?
+  id            Int            @id @default(autoincrement())
+  type          String?        
   title         String
   url           String
   asset_id      String?
@@ -57,7 +57,7 @@ model Photo {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String
-  url        String?
+  url       String?
   createdAt DateTime @default(now()) @db.Timestamp(0)
   updatedAt DateTime @updatedAt @db.Timestamp(0)
   Photos    Photo[]
