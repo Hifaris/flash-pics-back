@@ -66,31 +66,23 @@ exports.listPhoto = async (req, res, next) => {
             prisma.photo.findMany({
                 skip,
                 take: pageSize,
-                orderBy: { createdAt: "desc" },
-                select: {
-                    id: true,
-                    photoId: true,  // Add this if you have it
-                    title: true,
-                    url: true,
-                    public_id: true,
-                    price: true,
-                    createdAt: true,
+                include: {  // Change 'select' to 'include'
                     category: {
-                        select: { name: true, id: true }
+                        select: { 
+                            name: true, 
+                            id: true 
+                        }
                     }
                 },
+                orderBy: { 
+                    createdAt: "desc" 
+                }
             }),
             prisma.photo.count()
         ]);
 
-        // Transform the data to ensure id is present
-        const transformedPhotos = photos.map(photo => ({
-            ...photo,
-            id: photo.id,  // Explicitly include id
-        }));
-
         res.json({
-            photos: transformedPhotos,
+            photos,
             pagination: {
                 page,
                 pageSize,
