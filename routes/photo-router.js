@@ -8,7 +8,7 @@ router.post("/",authCheck,adminCheck,upload.single("file"),createPhoto)
 router.get("/",allPhotos)
 router.get("/getphotodetail/:id",readPhoto)
 
-router.get("/", listPhoto); 
+router.get("/list",listPhoto)
 router.get('/get/:id',read)
 
 router.post("/photoBy",sortPhotos)
