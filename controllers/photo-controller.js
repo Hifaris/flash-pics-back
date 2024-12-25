@@ -59,13 +59,13 @@ exports.allPhotos = async (req, res, next) => {
 exports.listPhoto = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const pageSize = 16; // Fixed to exactly 16 photos (4x4 grid)
+        const pageSize = 16;
         const skip = (page - 1) * pageSize;
 
         const [photos, total] = await Promise.all([
             prisma.photo.findMany({
                 skip,
-                take: pageSize, // Always take exactly 16 photos
+                take: pageSize,
                 orderBy: { createdAt: "desc" },
                 select: {
                     id: true,
