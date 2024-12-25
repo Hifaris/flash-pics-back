@@ -57,29 +57,43 @@ exports.allPhotos = async (req, res, next) => {
 
 exports.listPhoto = async (req, res, next) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 16;
+        const skip = (page - 1) * pageSize;
 
-        const { count } = req.params
-        const photos = await prisma.photo.findMany({
-            take: +count,
-            orderBy: { createdAt: "desc" },
-            select: {
-                id: true,
-                title: true,
-                url: true,
-                public_id: true,
-                price: true,
-                createdAt: true,
-                category: {
-                    select: { name: true, id: true }
-                }
-            },
+        const [photos, total] = await Promise.all([
+            prisma.photo.findMany({
+                skip,
+                take: pageSize,
+                orderBy: { createdAt: "desc" },
+                select: {
+                    id: true,
+                    title: true,
+                    url: true,
+                    public_id: true,
+                    price: true,
+                    createdAt: true,
+                    category: {
+                        select: { name: true, id: true }
+                    }
+                },
+            }),
+            prisma.photo.count()
+        ]);
 
-        })
-        res.json({ photos })
+        res.json({
+            photos,
+            pagination: {
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize)
+            }
+        });
     } catch (err) {
-        next(err)
+        next(err);
     }
-}
+};
 exports.readPhoto = async (req, res, next) => {
     try {
 
