@@ -69,6 +69,7 @@ exports.listPhoto = async (req, res, next) => {
                 orderBy: { createdAt: "desc" },
                 select: {
                     id: true,
+                    photoId: true,  // Add this if you have it
                     title: true,
                     url: true,
                     public_id: true,
@@ -82,8 +83,14 @@ exports.listPhoto = async (req, res, next) => {
             prisma.photo.count()
         ]);
 
+        // Transform the data to ensure id is present
+        const transformedPhotos = photos.map(photo => ({
+            ...photo,
+            id: photo.id,  // Explicitly include id
+        }));
+
         res.json({
-            photos,
+            photos: transformedPhotos,
             pagination: {
                 page,
                 pageSize,
