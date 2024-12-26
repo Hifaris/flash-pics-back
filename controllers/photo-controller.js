@@ -202,26 +202,51 @@ exports.deletePhoto = async (req, res, next) => {
 
 const handleQuery = async (req, res, query) => {
     try {
-        const products = await prisma.photo.findMany({
-            where: {
-                title: {
-                    contains: query,
-                }
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 16;
+        const skip = (page - 1) * pageSize;
+
+        const [products, total] = await Promise.all([
+            prisma.photo.findMany({
+                where: {
+                    title: {
+                        contains: query,
+                    },
+                },
+                skip,
+                take: pageSize,
+                include: {
+                    category: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            }),
+            prisma.photo.count({
+                where: {
+                    title: {
+                        contains: query,
+                    },
+                },
+            }),
+        ]);
+
+        res.json({
+            photos: products,
+            pagination: {
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize),
             },
-            include: {
-                category: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
-                }
-            }
-        })
-        res.json(products)
+        });
     } catch (err) {
-        next(err)
+        next(err);
     }
-}
+};
+
 
 const handleCategory = async (req, res, category) => {
     try {
