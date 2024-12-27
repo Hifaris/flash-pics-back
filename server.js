@@ -15,7 +15,7 @@ const cors = require("cors")
 app.use(express.json())
 app.use(morgan('dev'))
 app.use(cors({
-    origin:process.env.ORIGIN,
+    origin:[process.env.ORIGIN,process.env.DEVELOP],
     method:['GET','POST','PATCH','PUT','DELETE'],
     credentials:true,
 }))
