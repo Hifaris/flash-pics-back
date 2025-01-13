@@ -56,7 +56,6 @@ exports.createUserCart = async (req, res, next) => {
             where: { id: req.user.user.id }
         })
 
-        //delete old cart item
         await prisma.photoOnCart.deleteMany({
             where: {
                 cart: {
@@ -65,12 +64,10 @@ exports.createUserCart = async (req, res, next) => {
             }
         })
 
-        //delete old cart
         await prisma.cart.deleteMany({
             where: { userId: user.id }
         })
 
-        // prepare photo
         let products = cart.map((item) => ({
             photoId: item.id,
             price: item.price
@@ -257,6 +254,41 @@ exports.saveOrder = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.getAllOrder = async (req, res, next) => {
+    try {
+        
+      const result = await prisma.order.findMany({
+        where: {
+          paymentStatus: "CONFIRM", // เฉพาะออเดอร์ที่ยืนยันแล้ว
+        },
+        include: {
+          photoOrders: true,
+        },
+      });
+  
+    
+      const totalSales = result.reduce(
+        (sum, order) => sum + parseFloat(order.total),
+        0
+      );
+      const totalDownloads = result.reduce(
+        (sum, order) => sum + order.photoOrders.length,
+        0
+      );
+      const totalOrders = result.length;
+  
+    
+      res.status(200).json({
+        totalSales,
+        totalDownloads,
+        totalOrders,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
 
 
 exports.getOrder = async (req, res, next) => {

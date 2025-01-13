@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {listUsers,changStatus,changRole,createUserCart,getUserCart,deleteUserCart,saveOrder,getOrder,getOneOrder,changPaymentStatus} = require("../controllers/user-controller")
+const {listUsers,changStatus,changRole,createUserCart,getUserCart,deleteUserCart,saveOrder,getOrder,getOneOrder,changPaymentStatus, getAllOrder} = require("../controllers/user-controller")
 const {authCheck,adminCheck} = require("../middlewares/authen")
 
 
@@ -13,6 +13,7 @@ router.post("/cart",authCheck,createUserCart)
 router.get("/cart",authCheck,getUserCart)
 router.delete("/cart/:id",authCheck,deleteUserCart)
 
+router.get("/allOrder",getAllOrder)
 router.post("/order",authCheck,saveOrder)
 router.get("/order",authCheck,getOrder)
 router.get("/user-order/:id",authCheck,getOneOrder)

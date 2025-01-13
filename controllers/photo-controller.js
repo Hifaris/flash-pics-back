@@ -66,7 +66,7 @@ exports.listPhoto = async (req, res, next) => {
             prisma.photo.findMany({
                 skip,
                 take: pageSize,
-                include: {  // Change 'select' to 'include'
+                include: { 
                     category: {
                         select: { 
                             name: true, 
